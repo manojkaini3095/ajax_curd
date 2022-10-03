@@ -1,0 +1,181 @@
+﻿@model IEnumerable<ajax_curd.Models.StudentModel>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@section Scripts{
+    <script>
+        $(document).ready(function() {
+            // GET BY ID
+            $(".btn-get-student").on("click", function() {
+                var formData = new FormData();
+                var studentid = $(this).attr("data-studentid");
+                var url = '@Url.Action("GetDetailsById", "Home")' + '/' + studentid;
+                debugger;
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: function(response) {
+                        if (response.responseCode == 0) {
+                            var student = JSON.parse(response.responseMessage);
+                            $("#email").val(student.Email);
+                            $("#name").val(student.Name);
+                            $("#hdn-student-id").val(student.Id);
+
+                        }
+                        else {
+                            bootbox.alert(response.ResponseMessage);
+                        }
+                    },
+                    error: errorCallback
+                });
+            });
+            //SAVE
+            $("#btn-insert-student").on("click", function() {
+                var formData = new FormData();
+                formData.append("name", $("#name").val());
+                formData.append("email", $("#email").val());
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("InsertStudent", "Home")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            // UPDATE
+            $("#btn-update-student").on("click", function() {
+                var formData = new FormData();
+                formData.append("id", $("#hdn-student-id").val());
+                formData.append("name", $("#name").val());
+                formData.append("email", $("#email").val());
+                $.ajax({
+                    type: 'PUT',
+                    url: '@Url.Action("UpdateStudent", "Home")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            //DELETE
+            $("#btn-delete-student").on("click", function() {
+                var formData = new FormData();
+                formData.append("id", $("#hdn-student-id").val());
+                $.ajax({
+                    type: 'DELETE',
+                    url: '@Url.Action("DeleteStudent", "Home")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            function resetForm() {
+                $("#hdn-student-id").val("");
+                $("#name").val("");
+                $("#email").val("");
+            }
+            function errorCallback() {
+                bootbox.alert("Something went wrong please contact admin.");
+            }
+            function successCallback(response) {
+                if (response.responseCode == 0) {
+                    resetForm();
+                    var url = '@Url.Action("Index", "Home")';
+                    window.location.href = url;
+                }
+                else {
+                    bootbox.alert(response.ResponseMessage);
+                }
+            };
+        });
+    </script>
+}
+    <div class="text-center">
+        <h1 class="display-4">Welcome To ASP.NET CORE AJAX Demo</h1>
+        <hr />
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <form>
+                <input type="hidden" id="hdn-student-id" />
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                        <div class="invalid-feedback">
+                            Please enter a valid email address for shipping updates.
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="lastName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" placeholder="Enter Your Name" value="" required="">
+                        <div class="invalid-feedback">
+                            Name is required.
+                        </div>
+                    </div>
+
+                </div>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td>  <a href="javascript:void(0)" class="btn btn-primary" id="btn-insert-student">Save Student</a></td>
+                            <td>
+                                <a href="javascript:void(0)" class="btn btn-info" id="btn-update-student">Update Student</a>
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" class="btn btn-danger" id="btn-delete-student">Delete Student</a>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </form>
+
+        </div>
+        <br />
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Name</td>
+                        <td>Email</td>
+                        <td>Action</td>
+                    </tr>
+                </thead>
+                <tbody id="student-list">
+                    @{
+
+                    foreach (var student in Model)
+                    {
+                                        <tr>
+                                            <td>@student.Id</td>
+                                            <td>@student.Name</td>
+                                            <td>@student.Email</td>
+                                            <td>
+                                                <a href="javascript:void(0)" data-studentid="@student.Id" class="btn btn-success btn-get-student">Get Student</a>
+                                            </td>
+                                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
